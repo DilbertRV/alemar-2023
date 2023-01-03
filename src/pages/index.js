@@ -1,5 +1,4 @@
 import { useRouter } from "next/router";
-import Link from "next/link";
 import { useState } from "react";
 import { Table, Button, Modal, TextInput, Label } from "flowbite-react";
 
@@ -43,9 +42,13 @@ export default function HomePage({ menus }) {
     const productoExistente = orden.find((p) => p.nombre === producto.nombre);
     if (productoExistente && productoExistente.cantidad > 0) {
       setOrden(
-        orden.map((p) =>
-          p.nombre === producto.nombre ? { ...p, cantidad: p.cantidad - 1 } : p
-        )
+        orden
+          .map((p) =>
+            p.nombre === producto.nombre
+              ? { ...p, cantidad: p.cantidad - 1 }
+              : p
+          )
+          .filter((p) => p.cantidad > 0)
       );
     }
   };
@@ -77,7 +80,7 @@ export default function HomePage({ menus }) {
   function handleOrdenSubmit() {
     if (orden.length === 0) return alert("No hay productos en la orden");
     router.push({
-      pathname: "/orden",
+      pathname: "/orden/procesarorden",
       query: { confirmarOrden: JSON.stringify(confirmarOrden) },
     });
   }
@@ -93,6 +96,7 @@ export default function HomePage({ menus }) {
     <>
       <Button onClick={() => router.push("/menu/new")}>Nuevo Menu</Button>
       <Button onClick={() => router.push("/menu")}>Inventario</Button>
+      <Button onClick={() => router.push("/orden")}>Ordenes</Button>
       <Button onClick={handleOrdenSubmit}>Confirmar orden</Button>
       <div className="flex flex-wrap gap-2">
         {menus.map((menu) => (

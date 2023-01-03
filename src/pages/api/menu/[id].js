@@ -27,41 +27,25 @@ export default async (req, res) => {
       }
     case "PUT":
       try {
-        // Busca el menú que contiene la categoría que contiene el producto a actualizar
-        const menu = await Menu.findOne({
-          "categorias.productos._id": id,
-        });
-        // Si no se encuentra el menú, devuelve un error
-        if (!menu)
-          return res
-            .status(404)
-            .json({ success: false + "No se encontró el menú" });
-        // Actualiza el producto específico utilizando el operador $set
-        await Menu.updateOne(
-          {
-            _id: menu._id,
-            "categorias.productos._id": id,
-          },
-          {
-            $set: {
-              "categorias.$.productos.$": body,
-            },
-          }
+        const { menu_id, categoria_id, producto_id, elProducto } = body;
+        const menu = await Menu.findById(menu_id);
+        const categoria = menu.categorias.find(
+          (c) => c._id.toString() === categoria_id
         );
-        // Devuelve el menú actualizado
-        const updatedMenu = await Menu.findById(menu._id);
-        return res.status(200).json(updatedMenu);
-      } catch (err) {
-        return res.status(500).json({ success: false + err });
-      }
-    case "DELETE":
-      try {
-        const menu = await Menu.findByIdAndDelete(id);
-        if (!menu)
-          return res.status(404).json({ success: false + "No encontrado" });
-        return res.status(204).json(menu);
-      } catch (err) {
-        return res.status(400).json({ success: false + err });
+        const producto = categoria.productos.find(
+          (p) => p._id.toString() === producto_id
+        );
+        producto.nombre = elProducto.nombre;
+        producto.precio = elProducto.precio;
+        await menu.save();
+        return res.status(200).send({
+          success: true,
+          mensaje: "Producto actualizado",
+        });
+      } catch (error) {
+        return res
+          .status(500)
+          .send({ success: false, mensaje: "Error al actualizar el producto" });
       }
     default:
       return res.status(400).json({ success: false });

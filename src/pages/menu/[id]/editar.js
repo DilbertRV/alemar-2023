@@ -10,7 +10,7 @@ export const getServerSideProps = async (ctx) => {
     props: {
       id,
       menus,
-      menu: menu || null,
+      menu: menu,
     },
   };
 };

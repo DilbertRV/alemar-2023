@@ -2,13 +2,15 @@ import { Button, Container, Form } from "semantic-ui-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Spinner } from "flowbite-react";
-//HAY QUE TERMINAR EL NEW, EL EDIT YA ESTÁ TERMINADO
-//EL NEW TIENE QUE GUARDAR EL VALOR DE LOS SELECTS EN EL ESTADO Y LOS PRODUCTOS PARA AGREGAR UNO NUEVO
 export default function NuevoProductoConCategoria({ id, menus, menu }) {
-  const [menus, setMenus] = useState([]);
-  const [menu, setMenu] = useState({ menu: "", categoria: "", producto: [] });
+  const [menuCompleto, setMenuCompleto] = useState([]);
+  // const [elProducto, setElProducto] = useState({
+  //   menu: "",
+  //   categoria: "",
+  //   producto: [],
+  // });
   const [selectedMenu, setSelectedMenu] = useState();
-  const [categorias, setCategorias] = useState([]);
+  const [categoriasDelMenu, setCategoriasDelMenu] = useState([]);
   const [selectedCategoria, setSelectedCategoria] = useState();
   const [producto, setProducto] = useState({ nombre: "", precio: "" });
   const [loading, setLoading] = useState(true);
@@ -17,51 +19,44 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
   const { push } = useRouter();
 
   useEffect(() => {
-    //Obtiene todos los menús del API
-    const getTodosLosMenus = async () => {
-      const res = await fetch("http://localhost:3000/api/menu");
-      const allMenus = await res.json();
-      setMenus(allMenus);
-    };
-    getTodosLosMenus();
+    if (!id) {
+      (async () => {
+        const response = await fetch("http://localhost:3000/api/menu");
+        const data = await response.json();
+        setMenuCompleto(data);
+        setLoading(false);
+      })();
+    }
   }, []);
 
   useEffect(() => {
-    //Si la URL tiene un id, obtiene el menú, categoria, producto[] del API
-    if (query.id) {
-      const getElMenu = async () => {
-        const res = await fetch("http://localhost:3000/api/menu/" + query.id);
-        const data = await res.json();
-        //setea el menú, categoria, producto[] en el estado
-        setMenu({
-          menu: data.nombreMenu,
-          categoria: data.nombreCategoria,
-          producto: data.producto,
-        });
-        setLoading(false);
-      };
-      getElMenu();
-    } else {
+    if (id) {
+      // setElProducto({
+      //   menu: menu.nombreMenu,
+      //   categoria: menu.nombreCategoria,
+      //   producto: menu.producto,
+      // });
+      setSelectedMenu(menu.nombreMenu);
+      setSelectedCategoria(menu.nombreCategoria);
+
+      (async () => {
+        const menuObtenido = menus.find((m) => m.nombre === menu.nombreMenu);
+        if (menuObtenido.categorias) {
+          setCategoriasDelMenu(menuObtenido.categorias);
+        }
+      })();
+      setProducto({
+        nombre: menu.producto.nombre,
+        precio: menu.producto.precio,
+      });
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    if (loading === false && menus.length > 0 && menu.menu) {
-      //Obtiene el menú del estado y lo setea en los diferentes estados para que cada uno
-      //tenga el valor correcto en el formulario de edición
-      const elMenu = menus.find((m) => m.nombre === menu.menu);
-      setSelectedMenu(elMenu.nombre);
-      setCategorias(elMenu.categorias);
-      setSelectedCategoria(menu.categoria);
-      setProducto(menu.producto);
-    }
-  }, [menus]);
-
   const datosRecopilados = {
-    menu: menu.menu,
-    categoria: menu.categoria,
-    producto: menu.producto,
+    menu: id ? menu.nombreMenu : selectedMenu,
+    categoria: id ? menu.nombreCategoria : selectedCategoria,
+    producto: id ? menu.producto : producto,
   };
 
   const validate = () => {
@@ -77,16 +72,15 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
     return errors;
   };
   const handleMenuChange = (_, data) => {
-    const menu = menus.find((menu) => menu.nombre === data.value);
-    setSelectedMenu(menu.nombre);
-    setCategorias(menu.categorias);
-    console.log(menu.nombre);
+    setSelectedMenu(data.value);
+    const menuObtenido = id
+      ? menus.find((menu) => menu.nombre === menu.nombreMenu)
+      : menuCompleto.find((menu) => menu.nombre === data.value);
+    setCategoriasDelMenu(menuObtenido.categorias);
   };
 
   const handleCategoriaChange = (_, data) => {
-    const categoria = categorias.find((c) => c.nombre === data.value);
-    setSelectedCategoria(categoria.nombre);
-    console.log(categoria.nombre);
+    setSelectedCategoria(data.value);
   };
 
   const handleChange = (e) => {
@@ -96,31 +90,54 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
     e.preventDefault();
     const errors = validate();
     if (Object.keys(errors).length > 0) return setErrors(errors);
+    setLoading(true);
     const losDatosRecopilados = {
-      ...datosRecopilados,
-      menu: selectedMenu,
-      categoria: selectedCategoria,
+      menu: id ? menu.nombreMenu : selectedMenu,
+      categoria: id ? menu.nombreCategoria : selectedCategoria,
       producto,
     };
-    if (query.id) return console.log("Esto es un update"); //await updateProducto(losDatosRecopilados);
-    console.log("Esto es una creación"); //await createProducto(losDatosRecopilados);
+    console.log("losDatosRecopilados", losDatosRecopilados);
+    if (id) {
+      await updateProducto(losDatosRecopilados);
+      setLoading(false);
+    } else {
+      await createProducto(losDatosRecopilados);
+      setLoading(false);
+    }
   };
 
-  const updateProducto = async (updatedDatosRecopilados) => {
+  const updateProducto = async (losDatosRecopilados) => {
+    setLoading(true);
+    const menuEncontrado = menus.find((m) => m.nombre === menu.nombreMenu);
+    const idDeLaCategoriaSeleccionada = menuEncontrado.categorias.find(
+      (c) => c.nombre === menu.nombreCategoria
+    )._id;
+    const idDelProducto = menu.producto._id;
+
     try {
-      await fetch("http://localhost:3000/api/menu/" + query.id, {
+      const response = await fetch("http://localhost:3000/api/menu/" + id, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updatedDatosRecopilados),
+        body: JSON.stringify({
+          menu_id: menuEncontrado._id,
+          categoria_id: idDeLaCategoriaSeleccionada,
+          producto_id: idDelProducto,
+          elProducto: losDatosRecopilados.producto,
+        }),
       });
+      //const { mensaje } = await response.json();
+      if (response.status === 200) {
+      } else {
+      }
+      push("/menu");
     } catch (error) {
       console.log(error);
     }
   };
 
-  const createProducto = async () => {
+  const createProducto = async (datosRecopilados) => {
     try {
       await fetch("http://localhost:3000/api/menu", {
         method: "POST",
@@ -134,17 +151,18 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
     }
   };
 
-  const optionsMenu = menus.map((m) => ({
+  const optionsMenu = (id ? menus : menuCompleto).map((m) => ({
     key: m._id,
     text: m.nombre,
     value: m.nombre,
   }));
 
-  const optionsCategoria = categorias.map((c) => ({
+  const optionsCategoria = categoriasDelMenu.map((c) => ({
     key: c._id,
     text: c.nombre,
     value: c.nombre,
   }));
+
   if (loading) {
     return (
       <div className="text-center">
@@ -152,17 +170,20 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
       </div>
     );
   }
-  if (menus.length === 0) return <div>No hay menus</div>;
+  if ((id && menus.length === 0) || (!id && menuCompleto.length === 0)) {
+    return <div>No hay menus</div>;
+  }
   return (
     <Container>
-      <h1>{query.id ? "Editar producto" : "Nuevo producto"}</h1>
+      <h1>{id ? "Editar producto" : "Nuevo producto"}</h1>
       <Form onSubmit={handleSubmit}>
         <Form.Group widths="equal">
           <Form.Select
             fluid
+            disabled={id}
             label="Selecciona el menú"
             options={optionsMenu}
-            defaultValue={menu.menu}
+            defaultValue={id ? menu.nombreMenu : selectedMenu}
             placeholder="Elije el menú"
             onChange={handleMenuChange}
             error={
@@ -171,9 +192,10 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
           />
           <Form.Select
             fluid
+            disabled={id}
             label="Selecciona la categoria"
             options={optionsCategoria}
-            defaultValue={menu.categoria}
+            defaultValue={id ? menu.nombreCategoria : selectedCategoria}
             placeholder="Elije la categoría"
             onChange={handleCategoriaChange}
             error={
@@ -187,7 +209,9 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
             label="Nombre del producto"
             placeholder="Nombre"
             name="nombre"
-            defaultValue={menu.producto.nombre}
+            defaultValue={
+              id ? menu.producto.nombre : datosRecopilados.producto.nombre
+            }
             onChange={handleChange}
             error={
               errors.nombre
@@ -200,7 +224,9 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
             label="Precio"
             placeholder="Precio"
             name="precio"
-            defaultValue={menu.producto.precio}
+            defaultValue={
+              id ? menu.producto.precio : datosRecopilados.producto.precio
+            }
             onChange={handleChange}
             error={
               errors.precio
@@ -209,9 +235,7 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
             }
           />
         </Form.Group>
-        <Button primary>
-          {query.id ? "Editar producto" : "Agregar producto"}
-        </Button>
+        <Button primary>{id ? "Editar producto" : "Agregar producto"}</Button>
       </Form>
     </Container>
   );
