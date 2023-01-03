@@ -32,7 +32,7 @@ export default function Inventario({ menus }) {
   return (
     <>
       <Button onClick={() => router.push("/menu/new")}>Nuevo Menu</Button>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 bg-slate-400">
         {menus.map((menu) => (
           <Button key={menu._id} onClick={handleSelectedMenu}>
             {menu.nombre}

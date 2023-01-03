@@ -67,10 +67,10 @@ export default function ConfirmarOrden({ confirmarOrden }) {
           ":" +
           fecha.getMinutes()}
       </h3>
-      {confirmarOrden.productos.map((producto) => {
+      {confirmarOrden.productos.map((producto, index) => {
         return (
           <>
-            <div key={producto._id}>
+            <div key={index}>
               <p>{producto.nombre}</p>
               <p>{producto.cantidad}</p>
               <p>{producto.nota}</p>

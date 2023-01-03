@@ -1,7 +1,6 @@
-import { Button, Container, Form } from "semantic-ui-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { Spinner } from "flowbite-react";
+import { Spinner, Label, Select, TextInput, Button } from "flowbite-react";
 export default function NuevoProductoConCategoria({ id, menus, menu }) {
   const [menuCompleto, setMenuCompleto] = useState([]);
   // const [elProducto, setElProducto] = useState({
@@ -59,7 +58,9 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
     producto: id ? menu.producto : producto,
   };
 
-  const validate = () => {
+  console.log("datosRecopilados", datosRecopilados);
+
+  const validate = (datosRecopilados) => {
     const errors = {};
     if (!datosRecopilados.menu) errors.menu = "El menú es requerido";
     if (!datosRecopilados.categoria)
@@ -68,19 +69,23 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
       errors.nombre = "Nombre es requerido";
     if (!datosRecopilados.producto.precio)
       errors.precio = "Precio es requerido";
-
     return errors;
   };
-  const handleMenuChange = (_, data) => {
-    setSelectedMenu(data.value);
-    const menuObtenido = id
-      ? menus.find((menu) => menu.nombre === menu.nombreMenu)
-      : menuCompleto.find((menu) => menu.nombre === data.value);
-    setCategoriasDelMenu(menuObtenido.categorias);
+  const handleMenuChange = (event) => {
+    setSelectedMenu(event.target.value);
+    if (event.target.value !== "Elije el menú") {
+      const menuObtenido = id
+        ? menus.find((menu) => menu.nombre === menu.nombreMenu)
+        : menuCompleto.find((menu) => menu.nombre === event.target.value);
+      setCategoriasDelMenu(menuObtenido.categorias);
+    } else {
+      setCategoriasDelMenu([]);
+      setSelectedCategoria("");
+    }
   };
 
-  const handleCategoriaChange = (_, data) => {
-    setSelectedCategoria(data.value);
+  const handleCategoriaChange = (event) => {
+    setSelectedCategoria(event.target.value);
   };
 
   const handleChange = (e) => {
@@ -88,15 +93,15 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const errors = validate();
-    if (Object.keys(errors).length > 0) return setErrors(errors);
-    setLoading(true);
     const losDatosRecopilados = {
       menu: id ? menu.nombreMenu : selectedMenu,
       categoria: id ? menu.nombreCategoria : selectedCategoria,
       producto,
     };
-    console.log("losDatosRecopilados", losDatosRecopilados);
+    const errors = validate(losDatosRecopilados);
+    console.log("errors", errors);
+    if (Object.keys(errors).length > 0) return setErrors(errors);
+    setLoading(true);
     if (id) {
       await updateProducto(losDatosRecopilados);
       setLoading(false);
@@ -146,6 +151,7 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
         },
         body: JSON.stringify(datosRecopilados),
       });
+      push("/menu");
     } catch (error) {
       console.log(error);
     }
@@ -174,69 +180,99 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
     return <div>No hay menus</div>;
   }
   return (
-    <Container>
+    <div className="container bg-slate-500">
       <h1>{id ? "Editar producto" : "Nuevo producto"}</h1>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group widths="equal">
-          <Form.Select
-            fluid
-            disabled={id}
-            label="Selecciona el menú"
-            options={optionsMenu}
-            defaultValue={id ? menu.nombreMenu : selectedMenu}
-            placeholder="Elije el menú"
-            onChange={handleMenuChange}
-            error={
-              errors.menu ? { content: errors.menu, pointing: "below" } : null
-            }
-          />
-          <Form.Select
-            fluid
-            disabled={id}
-            label="Selecciona la categoria"
-            options={optionsCategoria}
-            defaultValue={id ? menu.nombreCategoria : selectedCategoria}
-            placeholder="Elije la categoría"
-            onChange={handleCategoriaChange}
-            error={
-              errors.categoria
-                ? { content: errors.categoria, pointing: "below" }
-                : null
-            }
-          />
-          <Form.Input
-            fluid
-            label="Nombre del producto"
-            placeholder="Nombre"
-            name="nombre"
-            defaultValue={
-              id ? menu.producto.nombre : datosRecopilados.producto.nombre
-            }
-            onChange={handleChange}
-            error={
-              errors.nombre
-                ? { content: errors.nombre, pointing: "below" }
-                : null
-            }
-          />
-          <Form.Input
-            fluid
-            label="Precio"
-            placeholder="Precio"
-            name="precio"
-            defaultValue={
-              id ? menu.producto.precio : datosRecopilados.producto.precio
-            }
-            onChange={handleChange}
-            error={
-              errors.precio
-                ? { content: errors.precio, pointing: "below" }
-                : null
-            }
-          />
-        </Form.Group>
-        <Button primary>{id ? "Editar producto" : "Agregar producto"}</Button>
-      </Form>
-    </Container>
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+        <div>
+          <div id="select_menu">
+            <div className="mb-2 block">
+              <Label htmlFor="menu" value="Selecciona el menú" />
+            </div>
+            <Select
+              disabled={id}
+              id="menu"
+              placeholder="Elije el menú"
+              value={id ? menu.nombreMenu : selectedMenu}
+              onChange={handleMenuChange}
+            >
+              <option>Elije el menú</option>
+              {optionsMenu.map((m) => (
+                <option key={m.key} value={m.value}>
+                  {m.text}
+                </option>
+              ))}
+            </Select>
+            <div>
+              {errors.menu && (
+                <div className="text-red-500 text-sm">{errors.menu}</div>
+              )}
+            </div>
+          </div>
+          <div id="select_categoria" aria-disabled={id}>
+            <div className="mb-2 block">
+              <Label htmlFor="categoria" value="Selecciona la categoría" />
+              <Select
+                disabled={id}
+                id="categoria"
+                value={id ? menu.nombreCategoria : selectedCategoria}
+                onChange={handleCategoriaChange}
+              >
+                <option defaultValue="">Elije la categoría</option>
+                {optionsCategoria.map((c) => (
+                  <option key={c.key} value={c.value}>
+                    {c.text}
+                  </option>
+                ))}
+              </Select>
+              <div>
+                {errors.categoria && (
+                  <div className="text-red-500 text-sm">{errors.categoria}</div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="mb-2 block">
+            <Label htmlFor="nombre" value="Nombre" />
+            <TextInput
+              id="nombre"
+              name="nombre"
+              type="text"
+              placeholder="Nombre"
+              shadow={true}
+              defaultValue={
+                id ? menu.producto.nombre : datosRecopilados.producto.nombre
+              }
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            {errors.nombre && (
+              <div className="text-red-500 text-sm">{errors.nombre}</div>
+            )}
+          </div>
+          <div className="mb-2 block">
+            <Label htmlFor="precio" value="Precio" />
+            <TextInput
+              id="precio"
+              name="precio"
+              type="number"
+              shadow={true}
+              defaultValue={
+                id ? menu.producto.precio : datosRecopilados.producto.precio
+              }
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            {errors.precio && (
+              <div className="text-red-500 text-sm">{errors.precio}</div>
+            )}
+          </div>
+        </div>
+        <Button type="submit">
+          {id ? "Editar producto" : "Agregar producto"}
+        </Button>
+      </form>
+    </div>
   );
 }
