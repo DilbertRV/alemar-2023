@@ -15,7 +15,6 @@ export default async function handler(req, res) {
     case "POST":
       try {
         const orden = new Orden(body);
-        console.log(orden);
         if (orden) {
           await orden.save();
           return res.status(201).json("Orden procesada");
