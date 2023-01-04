@@ -2,17 +2,11 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { Table, Button, Modal, TextInput, Label } from "flowbite-react";
 
-export default function Inventario({ menus }) {
+Inventario.titulo = "Inventario";
+export default function Inventario({ menus, titulo = "Inventario" }) {
   const router = useRouter();
   const [selectedMenu, setSelectedMenu] = useState(menus[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-  const onClose = () => {
-    setIsModalOpen(false);
-  };
 
   const eliminarProducto = (producto) => {};
 
@@ -20,49 +14,80 @@ export default function Inventario({ menus }) {
     if (e.target.textContent === selectedMenu.nombre) return;
     const menu = menus.find((menu) => menu.nombre === e.target.textContent);
     setSelectedMenu(menu);
+
+    console.log(menu);
   };
 
   if (menus.length === 0)
     return (
       <div>
         No hay menus
-        <Button onClick={() => router.push("/menu/new")}>Nuevo Menu</Button>
+        <Button onClick={() => router.push("inventario/new")}>
+          Nuevo Menu
+        </Button>
       </div>
     );
   return (
     <>
-      <Button onClick={() => router.push("/menu/new")}>Nuevo Menu</Button>
-      <div className="flex flex-wrap gap-2 bg-slate-400">
+      <div className="flex p-3 pb-0 overflow-x-scroll flex-nowrap gap-2">
         {menus.map((menu) => (
-          <Button key={menu._id} onClick={handleSelectedMenu}>
-            {menu.nombre}
-          </Button>
+          <div key={menu._id} className="p-2">
+            <Button
+              id="botonMenu"
+              gradientDuoTone="gray"
+              size={"lg"}
+              className={`inline-block whitespace-nowrap !p-2 ${
+                menu._id === selectedMenu._id
+                  ? "border-white border-4 focus:border-red-50 focus:border-4 focus:shadow-lg"
+                  : ""
+              } `}
+              style={{
+                backgroundImage: `linear-gradient(
+                rgba(0, 0, 0, 0.5) 100%,
+                rgba(0, 0, 0, 0.5) 100%
+              ), url(${"/bebidas.png"})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                boxShadow: "rgba(0, 0, 0, 0.24) 0px 3px 8px",
+              }}
+              onClick={handleSelectedMenu}
+            >
+              <h1 className="text-xl font-semibold text-white whitespace-no-wrap">
+                {menu.nombre}
+              </h1>
+            </Button>
+          </div>
         ))}
       </div>
-      <h1 className="text-2xl font-semibold">{selectedMenu.nombre}</h1>
-      <div>
+      <div className="bg-white shadow-lg rounded-lg">
+        <h1 className="text-2xl font-semibold pl-3 pt-8">
+          {selectedMenu.nombre}
+          <hr className="w-2/4 mt-1 mb-2" />
+        </h1>
         {selectedMenu.categorias.map((categoria) => (
           <div key={categoria._id}>
-            <h2>{categoria.nombre}</h2>
+            <h2 className="pl-4 mb-2 mt-6 text-red-500 font-semibold">
+              {categoria.nombre}
+            </h2>
             <Table striped={true}>
               <Table.Head>
                 <Table.HeadCell>Producto</Table.HeadCell>
                 <Table.HeadCell>Precio</Table.HeadCell>
                 <Table.HeadCell>
-                  <span className="sr-only">Edit</span>
+                  <span className="sr-only">Editar</span>
                 </Table.HeadCell>
               </Table.Head>
               <Table.Body className="divide-y">
                 {categoria.productos.map((producto) => (
                   <Table.Row key={producto._id}>
                     <Table.Cell>{producto.nombre}</Table.Cell>
-
                     <Table.Cell>{producto.precio}</Table.Cell>
                     <Table.Cell className="flex flex-wrap gap-2">
                       <Button
                         variant="primary"
                         onClick={() =>
-                          router.push(`/menu/${producto._id}/editar`)
+                          router.push(`/inventario/${producto._id}/editar`)
                         }
                       >
                         Editar
@@ -87,7 +112,7 @@ export default function Inventario({ menus }) {
 }
 
 export const getServerSideProps = async (ctx) => {
-  const res = await fetch("http://localhost:3000/api/menu");
+  const res = await fetch("http://localhost:3000/api/inventario");
   const menus = await res.json();
   return {
     props: {

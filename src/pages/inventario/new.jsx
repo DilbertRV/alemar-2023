@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Spinner, Label, Select, TextInput, Button } from "flowbite-react";
+
+NuevoProductoConCategoria.titulo = "Nuevo producto";
 export default function NuevoProductoConCategoria({ id, menus, menu }) {
   const [menuCompleto, setMenuCompleto] = useState([]);
   // const [elProducto, setElProducto] = useState({
@@ -15,12 +17,12 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
   const [loading, setLoading] = useState(true);
 
   const [errors, setErrors] = useState({});
-  const { push } = useRouter();
+  const { push, back } = useRouter();
 
   useEffect(() => {
     if (!id) {
       (async () => {
-        const response = await fetch("http://localhost:3000/api/menu");
+        const response = await fetch("http://localhost:3000/api/inventario");
         const data = await response.json();
         setMenuCompleto(data);
         setLoading(false);
@@ -57,8 +59,6 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
     categoria: id ? menu.nombreCategoria : selectedCategoria,
     producto: id ? menu.producto : producto,
   };
-
-  console.log("datosRecopilados", datosRecopilados);
 
   const validate = (datosRecopilados) => {
     const errors = {};
@@ -99,16 +99,19 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
       producto,
     };
     const errors = validate(losDatosRecopilados);
-    console.log("errors", errors);
     if (Object.keys(errors).length > 0) return setErrors(errors);
     setLoading(true);
     if (id) {
+      //MANDAR MENSAJE DE QUE SE ACTUALIZÓ EL PRODUCTO
       await updateProducto(losDatosRecopilados);
       setLoading(false);
     } else {
+      //MANDAR MENSAJE DE QUE SE CREÓ EL PRODUCTO
       await createProducto(losDatosRecopilados);
       setLoading(false);
     }
+    //MANDAR NOMBRE DEL MENU Y CATEGORIA PARA QUE SE REDIRECCIONE A LA PAGINA DE INVENTARIO
+    //PARA QUE SE MUESTRE EL PRODUCTO CREADO O ACTUALIZADO
   };
 
   const updateProducto = async (losDatosRecopilados) => {
@@ -120,23 +123,26 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
     const idDelProducto = menu.producto._id;
 
     try {
-      const response = await fetch("http://localhost:3000/api/menu/" + id, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          menu_id: menuEncontrado._id,
-          categoria_id: idDeLaCategoriaSeleccionada,
-          producto_id: idDelProducto,
-          elProducto: losDatosRecopilados.producto,
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:3000/api/inventario/" + id,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            menu_id: menuEncontrado._id,
+            categoria_id: idDeLaCategoriaSeleccionada,
+            producto_id: idDelProducto,
+            elProducto: losDatosRecopilados.producto,
+          }),
+        }
+      );
       //const { mensaje } = await response.json();
       if (response.status === 200) {
       } else {
       }
-      push("/menu");
+      push("/inventario");
     } catch (error) {
       console.log(error);
     }
@@ -144,7 +150,7 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
 
   const createProducto = async (datosRecopilados) => {
     try {
-      await fetch("http://localhost:3000/api/menu", {
+      await fetch("http://localhost:3000/api/inventario", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -181,6 +187,9 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
   }
   return (
     <div className="container bg-slate-500">
+      <Button type="button" onClick={() => back()}>
+        Click here to go back
+      </Button>
       <h1>{id ? "Editar producto" : "Nuevo producto"}</h1>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <div>

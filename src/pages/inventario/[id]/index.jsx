@@ -1,6 +1,8 @@
-import { Button, Container, Form } from "semantic-ui-react";
+import { Container, Form } from "semantic-ui-react";
+import { Button } from "flowbite-react";
 import { useEffect, useState } from "react";
 
+DetalleDelProducto.titulo ? "Detalle del producto" : "Nuevo producto";
 export default function DetalleDelProducto({
   menus,
   menu,
@@ -87,6 +89,9 @@ export default function DetalleDelProducto({
   if (menus.length === 0) return <div>No hay menus</div>;
   return (
     <Container>
+      <Button type="button" onClick={() => router.back()}>
+        {/* Click here to go back  */}
+      </Button>
       <h1>Nuevo producto</h1>
       <Form onSubmit={handleSubmit}>
         <Form.Group widths="equal">
@@ -148,7 +153,7 @@ export default function DetalleDelProducto({
 }
 
 export async function getServerSideProps({ query: { id } }) {
-  const res = await fetch("http://localhost:3000/api/menu");
+  const res = await fetch("http://localhost:3000/api/inventario");
   const menus = await res.json();
   const menu = menus.find((m) => {
     return m.categorias.some((c) => c.productos.some((p) => p._id === id));

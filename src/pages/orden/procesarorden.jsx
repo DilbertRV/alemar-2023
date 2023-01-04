@@ -2,7 +2,8 @@ import { Button, Dropdown } from "flowbite-react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 
-export default function ConfirmarOrden({ confirmarOrden }) {
+ProcesarOrden.titulo = "Procesar la orden";
+export default function ProcesarOrden({ confirmarOrden }) {
   const router = useRouter();
   const [selectedMesa, setSelectedMesa] = useState(null);
   const fecha = new Date();
@@ -36,7 +37,7 @@ export default function ConfirmarOrden({ confirmarOrden }) {
         },
         body: JSON.stringify(datosRecopilados),
       });
-      router.push("/");
+      router.push("/orden");
     } else {
       alert("Por favor, seleccione una mesa");
     }
