@@ -265,6 +265,7 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
               id="precio"
               name="precio"
               type="number"
+              step="any"
               shadow={true}
               defaultValue={
                 id ? menu.producto.precio : datosRecopilados.producto.precio

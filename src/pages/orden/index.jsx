@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Table, Button, Modal, TextInput, Label } from "flowbite-react";
+import { TableMenu } from "components/TableMenu";
 
 NuavaOrden.titulo = "Nueva orden";
 export default function NuavaOrden({ menus }) {
@@ -39,7 +40,7 @@ export default function NuavaOrden({ menus }) {
     }
   };
 
-  const handleRestarProducto = (producto) => {
+  const restarProducto = (producto) => {
     const productoExistente = orden.find((p) => p.nombre === producto.nombre);
     if (productoExistente && productoExistente.cantidad > 0) {
       setOrden(
@@ -63,6 +64,7 @@ export default function NuavaOrden({ menus }) {
             p.nombre === producto.nombre ? { ...p, nota: nota } : p
           )
         );
+        setIsModalOpen(false);
       } else {
         //llamar al alert que todavía no está
         setIsModalOpen(false);
@@ -97,11 +99,19 @@ export default function NuavaOrden({ menus }) {
     );
   return (
     <>
-      <Button onClick={() => router.push("/inventario/new")}>Nuevo Menu</Button>
-      <Button onClick={() => router.push("/inventario")}>Inventario</Button>
-      <Button onClick={() => router.push("/orden/ordenes")}>Ordenes</Button>
-      <Button onClick={handleOrdenSubmit}>Confirmar orden</Button>
-      <div className="flex flex-wrap gap-2">
+      {/* <Button onClick={handleOrdenSubmit}>Confirmar orden</Button> */}
+      <TableMenu
+        menus={menus}
+        handleSelectedMenu={handleSelectedMenu}
+        selectedMenu={selectedMenu}
+        agregarProducto={agregarProducto}
+        restarProducto={restarProducto}
+        handleAgregarNota={handleAgregarNota}
+        orden={orden}
+        setNota={setNota}
+        type="orden"
+      />
+      {/* <div className="flex flex-wrap gap-2">
         {menus.map((menu) => (
           <Button key={menu._id} onClick={handleSelectedMenu}>
             {menu.nombre}
@@ -175,7 +185,7 @@ export default function NuavaOrden({ menus }) {
                     <Table.Cell className="flex flex-wrap">
                       <Button
                         variant="primary"
-                        onClick={() => handleRestarProducto(producto)}
+                        onClick={() => restarProducto(producto)}
                       >
                         <svg
                           className="w-5 h-5"
@@ -223,7 +233,7 @@ export default function NuavaOrden({ menus }) {
             </Table>
           </div>
         ))}
-      </div>
+      </div> */}
     </>
   );
 }
