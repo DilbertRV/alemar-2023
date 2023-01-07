@@ -9,18 +9,13 @@ export const TableMenu = ({
   agregarProducto,
   restarProducto,
   handleAgregarNota,
+  handleModal,
+  onClose,
+  isModalOpen,
   orden,
   setNota,
   type,
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const handleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-  const onClose = () => {
-    setIsModalOpen(false);
-  };
-  console.log(orden);
   const router = useRouter();
   return (
     <>
@@ -72,19 +67,35 @@ export const TableMenu = ({
                   <Table.HeadCell>Cantidad</Table.HeadCell>
                 ) : null}
                 <Table.HeadCell>Precio</Table.HeadCell>
-
-                <Table.HeadCell>
-                  <span className="sr-only">Opciones</span>
-                </Table.HeadCell>
+                {type === "orden" ? (
+                  <Table.HeadCell>Opciones</Table.HeadCell>
+                ) : (
+                  <Table.HeadCell>
+                    <span className="sr-only">Opciones</span>
+                  </Table.HeadCell>
+                )}
               </Table.Head>
               <Table.Body className="divide-y">
                 {categoria.productos.map((producto) => (
                   <Table.Row key={producto._id}>
-                    <Table.Cell
+                    {type === "orden" ? (
+                      <Table.Cell
+                        style={{ minWidth: "250px", maxWidth: "250px" }}
+                      >
+                        {producto.nombre}
+                      </Table.Cell>
+                    ) : (
+                      <Table.Cell
+                        style={{ minWidth: "365px", maxWidth: "350px" }}
+                      >
+                        {producto.nombre}
+                      </Table.Cell>
+                    )}
+                    {/* <Table.Cell
                       style={{ minWidth: "365px", maxWidth: "350px" }}
                     >
                       {producto.nombre}
-                    </Table.Cell>
+                    </Table.Cell> */}
                     {orden.length > 0 ? (
                       <Table.Cell>
                         {orden.find(
@@ -143,7 +154,7 @@ export const TableMenu = ({
                     >
                       {producto.precio}
                     </Table.Cell>
-                    <Table.Cell className="flex flex-wrap gap-2 justify-center">
+                    <Table.Cell className="flex flex-wrap gap-2 float-right justify-center">
                       <Button
                         variant="primary"
                         onClick={() => {

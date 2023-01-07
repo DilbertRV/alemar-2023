@@ -107,6 +107,9 @@ export default function NuavaOrden({ menus }) {
         agregarProducto={agregarProducto}
         restarProducto={restarProducto}
         handleAgregarNota={handleAgregarNota}
+        handleModal={handleModal}
+        isModalOpen={isModalOpen}
+        onClose={onClose}
         orden={orden}
         setNota={setNota}
         type="orden"
