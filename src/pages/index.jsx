@@ -11,7 +11,7 @@ export default function MenuPrincipal() {
   const route = useRouter();
 
   return (
-    <>
+    <div className="container">
       <Image
         className="
         absolute top-0 left-0 z-0
@@ -84,6 +84,6 @@ export default function MenuPrincipal() {
           </Link>
         </div>
       </div>
-    </>
+    </div>
   );
 }
