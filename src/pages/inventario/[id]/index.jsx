@@ -88,10 +88,7 @@ export default function DetalleDelProducto({
   }));
   if (menus.length === 0) return <div>No hay menus</div>;
   return (
-    <Container>
-      <Button type="button" onClick={() => router.back()}>
-        {/* Click here to go back  */}
-      </Button>
+    <div className="container">
       <h1>Nuevo producto</h1>
       <Form onSubmit={handleSubmit}>
         <Form.Group widths="equal">
@@ -148,7 +145,7 @@ export default function DetalleDelProducto({
         </Form.Group>
         <Button primary>Guardar</Button>
       </Form>
-    </Container>
+    </div>
   );
 }
 
