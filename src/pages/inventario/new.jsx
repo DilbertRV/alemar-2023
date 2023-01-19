@@ -5,11 +5,6 @@ import { Spinner, Label, Select, TextInput, Button } from "flowbite-react";
 NuevoProductoConCategoria.titulo = "Nuevo producto";
 export default function NuevoProductoConCategoria({ id, menus, menu }) {
   const [menuCompleto, setMenuCompleto] = useState([]);
-  // const [elProducto, setElProducto] = useState({
-  //   menu: "",
-  //   categoria: "",
-  //   producto: [],
-  // });
   const [selectedMenu, setSelectedMenu] = useState();
   const [categoriasDelMenu, setCategoriasDelMenu] = useState([]);
   const [selectedCategoria, setSelectedCategoria] = useState();
@@ -123,23 +118,20 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
     const idDelProducto = menu.producto._id;
 
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/inventario/" + id,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            menu_id: menuEncontrado._id,
-            categoria_id: idDeLaCategoriaSeleccionada,
-            producto_id: idDelProducto,
-            elProducto: losDatosRecopilados.producto,
-          }),
-        }
-      );
+      const res = await fetch(`http://localhost:3000/api/inventario/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          menu_id: menuEncontrado._id,
+          categoria_id: idDeLaCategoriaSeleccionada,
+          producto_id: idDelProducto,
+          elProducto: losDatosRecopilados.producto,
+        }),
+      });
       //const { mensaje } = await response.json();
-      if (response.status === 200) {
+      if (res.status === 200) {
       } else {
       }
       push("/inventario");
@@ -157,7 +149,16 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
         },
         body: JSON.stringify(datosRecopilados),
       });
-      push("/menu");
+      push(
+        {
+          pathname: "/inventario",
+          query: {
+            mensaje: `${datosRecopilados.producto.nombre}`,
+            type: "Agregar",
+          },
+        },
+        "/inventario"
+      );
     } catch (error) {
       console.log(error);
     }
@@ -186,10 +187,7 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
     return <div>No hay menus</div>;
   }
   return (
-    <div className="container bg-slate-500">
-      <Button type="button" onClick={() => back()}>
-        Click here to go back
-      </Button>
+    <div className="container">
       <h1>{id ? "Editar producto" : "Nuevo producto"}</h1>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <div>
@@ -279,7 +277,7 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
             )}
           </div>
         </div>
-        <Button type="submit">
+        <Button className="bg-red-500 hover:bg-red-700" type="submit">
           {id ? "Editar producto" : "Agregar producto"}
         </Button>
       </form>
