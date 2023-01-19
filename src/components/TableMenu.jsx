@@ -10,6 +10,7 @@ export const TableMenu = ({
   agregarProducto,
   restarProducto,
   handleAgregarNota,
+  eliminarProducto,
   orden,
   setNota,
   setOrden,
@@ -49,7 +50,6 @@ export const TableMenu = ({
     await new Promise((resolve) => {
       setTimeout(() => {
         const inputText = document.getElementById("nota_" + producto._id);
-        console.log(inputText);
         resolve();
 
         inputText.value = getNotaDeLaOrden(orden, producto);
@@ -95,7 +95,7 @@ export const TableMenu = ({
           </div>
         ))}
       </div>
-      <div className="bg-white shadow-lg rounded-lg">
+      <div className="bg-white rounded-lg">
         <h1 className="text-2xl font-semibold pl-3 pt-8">
           {selectedMenu.nombre}
           <hr className="w-2/4 mt-1 mb-2" />
@@ -288,7 +288,11 @@ export const TableMenu = ({
                         onClick={() => {
                           type === "orden"
                             ? agregarProducto(producto)
-                            : eliminarProducto(producto);
+                            : eliminarProducto(
+                                selectedMenu._id,
+                                categoria._id,
+                                producto._id
+                              );
                         }}
                       >
                         {type === "orden" ? (
