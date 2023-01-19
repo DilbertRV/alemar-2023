@@ -24,7 +24,7 @@ export default function MenuPrincipal() {
       <div className="flex justify-center">
         <Image
           className="z-10"
-          src="/logo.svg"
+          src="/logoAlemar.png"
           alt="Logo Alemar"
           width={505}
           height={307}

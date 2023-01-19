@@ -11,7 +11,5 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   plugins: [require("flowbite/plugin")],
-  theme: {
-    colors: require("tailwindcss/colors"),
-  },
+  theme: {},
 };
