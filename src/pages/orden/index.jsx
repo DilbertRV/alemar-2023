@@ -102,6 +102,24 @@ export default function NuavaOrden({ menus }) {
         setOrden={setOrden}
         type="orden"
       />
+      <div>
+        <Button
+          disabled={orden.length === 0}
+          onClick={handleOrdenSubmit}
+          className={`${
+            orden.length > 0
+              ? "transition  duration-150 opacity-300 translate-y-6"
+              : "opacity-0 duration-100 transition-all selection:"
+          } absolute right-0 top-52 bg-red-500 hover:bg-red-600 rounded-r-none w-52 h-[65px] shadow-lg`}
+        >
+          Confirmar orden
+        </Button>
+        {/* {orden.length > 0 && (
+          <Button className="transition ease-in duration-100 fixed right-0 top-60 bg-red-500 hover:bg-red-600 rounded-r-none w-52 h-[65px] shadow-lg">
+            Confirmar orden
+          </Button>
+        )} */}
+      </div>
     </>
   );
 }
