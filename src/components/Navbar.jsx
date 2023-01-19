@@ -8,7 +8,20 @@ export const NavbarMenu = ({ titulo }) => {
     <div className="flex flex-wrap items-center mt-3 h-16">
       <div className="mx-3">
         {titulo != null ? (
-          <Button color={"transparent"} onClick={() => router.back()}>
+          <Button
+            color={"transparent"}
+            onClick={
+              titulo == "Nuevo producto"
+                ? () =>
+                    router.replace("/inventario", undefined, { shallow: true })
+                : titulo == "Detalle del producto"
+                ? () =>
+                    router.replace("/inventario", undefined, { shallow: true })
+                : titulo == "Inventario"
+                ? () => router.replace("/", undefined, { shallow: true })
+                : () => router.back()
+            }
+          >
             <IoReturnUpBackOutline size={35} />
           </Button>
         ) : null}
