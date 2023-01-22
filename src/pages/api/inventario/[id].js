@@ -9,7 +9,8 @@ export default async (req, res) => {
     query: { id },
   } = req;
 
-  const { menu_id, categoria_id, producto_id, elProducto } = body;
+  const { accion, menu_id, nombre, categoria_id, producto_id, elProducto } =
+    body;
 
   switch (method) {
     case "GET":
@@ -29,24 +30,45 @@ export default async (req, res) => {
       }
     case "PUT":
       try {
-        const menu = await Menu.findById(menu_id);
-        const categoria = menu.categorias.find(
-          (c) => c._id.toString() === categoria_id
-        );
-        const producto = categoria.productos.find(
-          (p) => p._id.toString() === producto_id
-        );
-        producto.nombre = elProducto.nombre;
-        producto.precio = elProducto.precio;
-        await menu.save();
-        return res.status(200).send({
-          success: true,
-          mensaje: "Producto actualizado",
-        });
+        if (accion == undefined) {
+          const menu = await Menu.findById(menu_id);
+          const categoria = menu.categorias.find(
+            (c) => c._id.toString() === categoria_id
+          );
+          const producto = categoria.productos.find(
+            (p) => p._id.toString() === producto_id
+          );
+          producto.nombre = elProducto.nombre;
+          producto.precio = elProducto.precio;
+          await menu.save();
+          return res.status(200).send({
+            success: true,
+            mensaje: "Producto actualizado",
+          });
+        } else if (accion == "updateMenu") {
+          const menu = await Menu.findById(menu_id);
+          menu.nombre = nombre;
+          await menu.save();
+          return res.status(200).send({
+            success: true,
+            mensaje: "Nombre del menú actualizado",
+          });
+        } else if (accion == "updateCategoria") {
+          const menu = await Menu.findById(menu_id);
+          const categoria = menu.categorias.find(
+            (c) => c._id.toString() === categoria_id
+          );
+          categoria.nombre = nombre;
+          await menu.save();
+          return res.status(200).send({
+            success: true,
+            mensaje: "Nombre de la categoría actualizado",
+          });
+        }
       } catch (error) {
         return res
           .status(500)
-          .send({ success: false, mensaje: "Error al actualizar el producto" });
+          .send({ success: false, mensaje: "Error al actualizar" });
       }
     case "DELETE":
       try {
