@@ -1,5 +1,6 @@
 import { Button, Table, Modal, Label, TextInput, Toast } from "flowbite-react";
 import { IoClose, IoPencil } from "react-icons/io5";
+import { AiFillEdit } from "react-icons/ai";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -11,19 +12,37 @@ export const TableMenu = ({
   restarProducto,
   handleAgregarNota,
   eliminarProducto,
+  updateNombreDelMenu,
+  setNombreDelMenu,
+  nombreDelMenu,
+  updateCategoriaDelMenu,
+  setCategoriaDelMenu,
+  categoriaDelMenu,
   orden,
   setNota,
   setOrden,
   type,
 }) => {
   const router = useRouter();
-
   const [error, setError] = useState("");
-
   function handleChange(e) {
     setNota(e.target.value);
     setError(e.target.value.length > 0 ? "" : "Campo requerido");
   }
+
+  const handleChangeCategoria = (categoriaId) => (e) => {
+    setCategoriaDelMenu({
+      ...categoriaDelMenu,
+      [categoriaId]: e.target.value,
+    });
+  };
+  const handleSubmitNombreCategoria = (selectedMenuId, categoriaId) => () => {
+    updateCategoriaDelMenu(
+      selectedMenuId,
+      categoriaId,
+      categoriaDelMenu[categoriaId]
+    );
+  };
 
   const handleSubmitNota = (producto) => {
     if (error === "") {
@@ -80,7 +99,9 @@ export const TableMenu = ({
                 backgroundImage: `linear-gradient(
                 rgba(0, 0, 0, 0.5) 100%,
                 rgba(0, 0, 0, 0.5) 100%
-              ), url(${"/bebidas.png"})`,
+              ), url(${
+                menu.nombre !== "Bebidas" ? "/menu2.png" : "/menu3.png"
+              })`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
@@ -96,15 +117,77 @@ export const TableMenu = ({
         ))}
       </div>
       <div className="bg-white rounded-lg">
-        <h1 className="text-2xl font-semibold pl-3 pt-8">
-          {selectedMenu.nombre}
-          <hr className="w-2/4 mt-1 mb-2" />
-        </h1>
+        {type == "orden" ? (
+          <h1 className="text-2xl font-semibold pl-3 pt-8">
+            {selectedMenu.nombre}
+            <hr className="w-2/4 mt-1 mb-2" />
+          </h1>
+        ) : (
+          <div className="flex gap-x-2 items-center pt-4">
+            <TextInput
+              id={"input" + selectedMenu._id}
+              label="Nombre del menu"
+              value={nombreDelMenu}
+              onChange={(e) => setNombreDelMenu(e.target.value)}
+              className="w-auto text-xl font-bold"
+              color={"light"}
+              sizing={"lg"}
+              required={true}
+            />
+            <Button
+              id={"buttonMenu" + selectedMenu._id}
+              disabled={
+                nombreDelMenu === "" || nombreDelMenu === selectedMenu.nombre
+              }
+              size={"md"}
+              color={"gray"}
+              className="inline-block whitespace-nowrap !p-2"
+              onClick={() => updateNombreDelMenu(selectedMenu._id)}
+            >
+              <AiFillEdit color="black" size={25} />
+            </Button>
+          </div>
+        )}
         {selectedMenu.categorias.map((categoria) => (
           <div key={categoria._id}>
-            <h2 className="pl-4 mb-2 mt-6 text-red-500 font-semibold">
-              {categoria.nombre}
-            </h2>
+            {type === "orden" ? (
+              <h2 className="pl-4 mt-4 mb-2 text-red-500 font-semibold">
+                {categoria.nombre}
+              </h2>
+            ) : (
+              <div className="flex gap-x-2 mt-6 items-center">
+                <h2 className="pl-4 text-red-500 font-semibold">
+                  {categoria.nombre}
+                </h2>
+                <TextInput
+                  id={"inputCategoria" + categoria._id}
+                  label="Categoria del menu"
+                  placeholder="Nuevo nombre de la categoria"
+                  value={categoriaDelMenu[categoria._id] || ""}
+                  onChange={handleChangeCategoria(categoria._id)}
+                  className="w-auto text-xl font-bold text-red-500"
+                  color={"light"}
+                  sizing={"md"}
+                  required={true}
+                />
+                <Button
+                  id={"buttonCategoria" + categoria._id}
+                  size={"xxs"}
+                  color={"gray"}
+                  className="inline-block whitespace-nowrap !p-2"
+                  onClick={handleSubmitNombreCategoria(
+                    selectedMenu._id,
+                    categoria._id
+                  )}
+                  disabled={
+                    !categoriaDelMenu[categoria._id] ||
+                    categoriaDelMenu[categoria._id] === ""
+                  }
+                >
+                  <AiFillEdit color="black" size={25} />
+                </Button>
+              </div>
+            )}
             <Table striped={true}>
               <Table.Head className="text-center">
                 <Table.HeadCell className="text-left">Producto</Table.HeadCell>
