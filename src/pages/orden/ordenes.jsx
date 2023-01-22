@@ -1,6 +1,6 @@
 import { Fecha } from "components/Fecha";
 import { PrintButton } from "components/PrintButton";
-import { Card, Button } from "flowbite-react";
+import { Card, Badge } from "flowbite-react";
 
 Ordenes.titulo = "Lista de ordenes";
 export default function Ordenes({ orden }) {
@@ -11,9 +11,9 @@ export default function Ordenes({ orden }) {
           <div className="mb-4 flex items-center justify-between">
             <Fecha fecha={orden.fecha} />
             {/* SPAN mesa rounded */}
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
-              Mesa {orden.numeroMesa}
-            </span>
+            <Badge size={"sm"} color="success">
+              Mesa: {orden.numeroMesa}
+            </Badge>
           </div>
           <div id={orden._id} className="flow-root">
             <h2 className="text-lg text-gray-900">Lista de productos:</h2>
