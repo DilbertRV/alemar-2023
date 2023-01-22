@@ -12,26 +12,22 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
   const [loading, setLoading] = useState(true);
 
   const [errors, setErrors] = useState({});
-  const { push, back } = useRouter();
+  const { push } = useRouter();
 
   useEffect(() => {
     if (!id) {
-      (async () => {
+      const obtenerMenus = async () => {
         const response = await fetch("http://localhost:3000/api/inventario");
         const data = await response.json();
         setMenuCompleto(data);
         setLoading(false);
-      })();
+      };
+      obtenerMenus();
     }
   }, []);
 
   useEffect(() => {
     if (id) {
-      // setElProducto({
-      //   menu: menu.nombreMenu,
-      //   categoria: menu.nombreCategoria,
-      //   producto: menu.producto,
-      // });
       setSelectedMenu(menu.nombreMenu);
       setSelectedCategoria(menu.nombreCategoria);
 
@@ -132,9 +128,20 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
       });
       //const { mensaje } = await response.json();
       if (res.status === 200) {
+        push(
+          {
+            pathname: "/inventario",
+            query: {
+              mensaje: `${losDatosRecopilados.producto.nombre}`,
+              type: "Actualizar",
+            },
+          },
+          undefined,
+          { scroll: false },
+          "/inventario"
+        );
       } else {
       }
-      push("/inventario");
     } catch (error) {
       console.log(error);
     }
@@ -157,6 +164,8 @@ export default function NuevoProductoConCategoria({ id, menus, menu }) {
             type: "Agregar",
           },
         },
+        undefined,
+        { scroll: false },
         "/inventario"
       );
     } catch (error) {
