@@ -1,18 +1,32 @@
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { Table, Button, Modal, TextInput, Label } from "flowbite-react";
+import { Button } from "flowbite-react";
 import { TableMenu } from "components/TableMenu";
+import { useEffect } from "react";
 
 NuavaOrden.titulo = "Nueva orden";
-export default function NuavaOrden({ menus }) {
+export default function NuavaOrden({ menu }) {
   const router = useRouter();
-  const [selectedMenu, setSelectedMenu] = useState(menus[0]);
+  const [menus, setMenus] = useState(menu);
+  const [selectedMenu, setSelectedMenu] = useState(menu[0]);
   const [orden, setOrden] = useState([]);
   const [nota, setNota] = useState("");
 
   const confirmarOrden = {
     productos: [...orden],
   };
+
+  useEffect(() => {
+    const obtenerMenus = async () => {
+      const response = await fetch("http://localhost:3000/api/inventario");
+      const data = await response.json();
+
+      setMenus(data);
+      setSelectedMenu(data.find((menu) => menu._id === selectedMenu._id));
+    };
+
+    obtenerMenus();
+  }, [menu]);
 
   const agregarProducto = (producto) => {
     const productoExistente = orden.find((p) => p.nombre === producto.nombre);
@@ -126,10 +140,10 @@ export default function NuavaOrden({ menus }) {
 
 export const getServerSideProps = async (ctx) => {
   const res = await fetch("http://localhost:3000/api/inventario");
-  const menus = await res.json();
+  const menu = await res.json();
   return {
     props: {
-      menus,
+      menu,
     },
   };
 };
