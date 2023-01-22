@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 export const NavbarMenu = ({ titulo }) => {
   const router = useRouter();
   const color = titulo != "Restaurante" ? "red-500" : "white";
+
   return (
     <div className="flex flex-wrap items-center mt-3 h-16">
       <div className="mx-3">
@@ -12,13 +13,11 @@ export const NavbarMenu = ({ titulo }) => {
             color={"transparent"}
             onClick={
               titulo == "Nuevo producto"
-                ? () =>
-                    router.replace("/inventario", undefined, { shallow: true })
+                ? () => router.push("/inventario")
                 : titulo == "Detalle del producto"
-                ? () =>
-                    router.replace("/inventario", undefined, { shallow: true })
+                ? () => router.push("/inventario")
                 : titulo == "Inventario"
-                ? () => router.replace("/", undefined, { shallow: true })
+                ? () => router.replace("/")
                 : () => router.back()
             }
           >
