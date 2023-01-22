@@ -36,14 +36,11 @@ export default function MenuPrincipal() {
             className="h-32 border-b-8 w-full border-red-500 shadow-md"
             color={"transparent"}
             style={{
-              backgroundImage: `url(${"/Crearordenbgfood.png"})`,
+              backgroundImage: `url(${"/crearordenbgfood.png"})`,
             }}
             size="lg"
             onClick={() => route.push("/orden")}
           >
-            {/* <div className="relative bottom-0 right-2">
-            <Spinner size="lg" light={true} />
-          </div> */}
             <h3 className="text-3xl font-bold text-white">Crear nueva orden</h3>
           </Button>
         </Link>
@@ -58,9 +55,6 @@ export default function MenuPrincipal() {
               color="gray"
               size="xs"
             >
-              {/* <div className="relative bottom-0 right-2">
-              <Spinner size="lg" light={true} />
-            </div> */}
               <h3 className="flex text-3xl font-bold text-gray-900 text-left">
                 Ver todas las ordenes
               </h3>
