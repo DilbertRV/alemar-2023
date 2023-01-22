@@ -6,18 +6,116 @@ import { ToastMensaje } from "components/ToastMensaje";
 import { useEffect } from "react";
 
 Inventario.titulo = "Inventario";
-export default function Inventario({ menus }) {
+export default function Inventario({ menu }) {
   const router = useRouter();
-  const [selectedMenu, setSelectedMenu] = useState(menus[0]);
+  const [menus, setMenus] = useState(menu);
+  const [selectedMenu, setSelectedMenu] = useState(menu[0]);
+  const [nombreDelMenu, setNombreDelMenu] = useState(
+    selectedMenu ? selectedMenu.nombre : ""
+  );
+  const [categoriaDelMenu, setCategoriaDelMenu] = useState({});
+  const [update, setUpdate] = useState(false);
 
   useEffect(() => {
-    setSelectedMenu(menus[0]);
-  }, [menus]);
+    const obtenerMenus = async () => {
+      const response = await fetch("http://localhost:3000/api/inventario");
+      const data = await response.json();
+
+      setMenus(data);
+      setNombreDelMenu(
+        data.find((menu) => menu._id === selectedMenu._id).nombre
+      );
+      setSelectedMenu(data.find((menu) => menu._id === selectedMenu._id));
+    };
+
+    obtenerMenus();
+  }, [menu, update]);
 
   const handleSelectedMenu = (e) => {
+    setNombreDelMenu(e.target.textContent);
     if (e.target.textContent === selectedMenu.nombre) return;
     const menu = menus.find((menu) => menu.nombre === e.target.textContent);
     setSelectedMenu(menu);
+  };
+
+  const updateNombreDelMenu = async (menu_id) => {
+    if (nombreDelMenu === selectedMenu.nombre) return;
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/inventario/${menu_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            menu_id: menu_id,
+            nombre: nombreDelMenu,
+            accion: "updateMenu",
+          }),
+        }
+      );
+      if (response.status === 200) {
+        setUpdate(!update);
+        router.replace(
+          {
+            pathname: "/inventario",
+            query: {
+              mensaje: `${nombreDelMenu}`,
+              type: "ActualizarMenu",
+            },
+          },
+          undefined,
+          { scroll: false },
+          "/inventario"
+        );
+      } else {
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const updateCategoriaDelMenu = async (
+    menu_id,
+    categoria_id,
+    nuevaCategoria
+  ) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/inventario/${menu_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            menu_id: menu_id,
+            categoria_id: categoria_id,
+            nombre: nuevaCategoria,
+            accion: "updateCategoria",
+          }),
+        }
+      );
+      if (response.status === 200) {
+        setUpdate(!update);
+        router.replace(
+          {
+            pathname: "/inventario",
+            query: {
+              mensaje: `${categoriaDelMenu[categoria_id]}`,
+              type: "ActualizarCategoria",
+            },
+          },
+          undefined,
+          { scroll: false },
+          "/inventario"
+        );
+      } else {
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const eliminarProducto = async (menu_id, categoria_id, producto_id) => {
@@ -37,7 +135,8 @@ export default function Inventario({ menus }) {
         }
       );
       if (response.status === 200) {
-        router.push(
+        setUpdate(!update);
+        router.replace(
           {
             pathname: "/inventario",
             query: {
@@ -45,10 +144,14 @@ export default function Inventario({ menus }) {
               type: "Eliminar",
             },
           },
+          undefined,
+          { scroll: false },
           "/inventario"
         );
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   if (menus.length === 0)
@@ -75,6 +178,12 @@ export default function Inventario({ menus }) {
         menus={menus}
         handleSelectedMenu={handleSelectedMenu}
         selectedMenu={selectedMenu}
+        updateNombreDelMenu={updateNombreDelMenu}
+        nombreDelMenu={nombreDelMenu}
+        setNombreDelMenu={setNombreDelMenu}
+        updateCategoriaDelMenu={updateCategoriaDelMenu}
+        categoriaDelMenu={categoriaDelMenu}
+        setCategoriaDelMenu={setCategoriaDelMenu}
         eliminarProducto={eliminarProducto}
         type="inventario"
       />
@@ -84,10 +193,10 @@ export default function Inventario({ menus }) {
 
 export const getServerSideProps = async (ctx) => {
   const res = await fetch("http://localhost:3000/api/inventario");
-  const menus = await res.json();
+  const menu = await res.json();
   return {
     props: {
-      menus,
+      menu,
     },
   };
 };
